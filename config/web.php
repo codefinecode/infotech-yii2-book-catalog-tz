@@ -4,7 +4,7 @@ $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 $config = [
-    'id' => 'basic',
+    'id' => 'infotech-book-catalog-tz',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
@@ -48,16 +48,44 @@ $config = [
             'assignmentFile' => '@app/rbac/assignments.php',
             'ruleFile' => '@app/rbac/rules.php',
         ],
-        /*
+        // Queue
+        'queue' => [
+            'class' => \yii\queue\file\Queue::class,
+            'path' => '@runtime/queue',
+            'as log' => \yii\queue\LogBehavior::class,
+        ],
+        // URL Manager
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'books' => 'book/index',
+                'books/create' => 'book/create',
+                'books/<id:\d+>' => 'book/view',
+                'books/<id:\d+>/edit' => 'book/update',
+                'books/<id:\d+>/delete' => 'book/delete',
+                
+                'authors' => 'author/index',
+                'authors/<id:\d+>' => 'author/view',
+                'authors/<id:\d+>/subscribe' => 'author/subscribe',
+                
+                'reports/top-authors' => 'report/top-authors',
+                'reports/top-authors/<year:\d{4}>' => 'report/top-authors',
             ],
         ],
-        */
     ],
     'params' => $params,
+    // Контейнер зависимостей
+    'container' => [
+        'definitions' => [
+            'app\services\BookService' => [],
+            'app\services\SmsService' => [
+                'apiKey' => 'emulator_key',
+            ],
+            'app\services\SubscriptionService' => [],
+            'app\services\ReportService' => [],
+        ],
+    ],
 ];
 
 if (YII_ENV_DEV) {

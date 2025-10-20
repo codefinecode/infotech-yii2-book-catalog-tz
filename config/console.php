@@ -26,11 +26,18 @@ $config = [
             ],
         ],
         'db' => $db,
+        // RBAC для консоли
         'authManager' => [
             'class' => 'yii\rbac\PhpManager',
             'itemFile' => '@app/rbac/items.php',
             'assignmentFile' => '@app/rbac/assignments.php',
             'ruleFile' => '@app/rbac/rules.php',
+        ],
+        // Queue для консоли
+        'queue' => [
+            'class' => \yii\queue\file\Queue::class,
+            'path' => '@runtime/queue',
+            'as log' => \yii\queue\LogBehavior::class,
         ],
     ],
     'params' => $params,
