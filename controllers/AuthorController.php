@@ -4,7 +4,9 @@ namespace app\controllers;
 
 use Yii;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use app\models\Author;
 use app\forms\SubscriptionForm;
 
@@ -21,6 +23,17 @@ class AuthorController extends Controller
                         'actions' => ['index', 'view', 'subscribe'],
                         'roles' => ['?', '@'],
                     ],
+                    [
+                        'allow' => true,
+                        'actions' => ['create', 'update', 'delete'],
+                        'roles' => ['manageBooks'],
+                    ],
+                ],
+            ],
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['post'],
                 ],
             ],
         ];
@@ -48,7 +61,7 @@ class AuthorController extends Controller
             ->one();
 
         if (!$author) {
-            throw new \yii\web\NotFoundHttpException('Автор не найден');
+            throw new NotFoundHttpException('Автор не найден');
         }
 
         $subscriptionForm = new SubscriptionForm();
@@ -76,5 +89,52 @@ class AuthorController extends Controller
 
         Yii::$app->session->setFlash('error', 'Ошибка при подписке');
         return $this->redirect(Yii::$app->request->referrer ?: ['author/index']);
+    }
+
+    public function actionCreate()
+    {
+        $model = new Author();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Автор создан');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Автор обновлён');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->delete()) {
+            Yii::$app->session->setFlash('success', 'Автор удалён');
+        } else {
+            Yii::$app->session->setFlash('error', 'Не удалось удалить автора');
+        }
+        return $this->redirect(['index']);
+    }
+
+    protected function findModel($id)
+    {
+        if (($model = Author::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new NotFoundHttpException('Автор не найден');
     }
 }

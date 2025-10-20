@@ -6,6 +6,7 @@ use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use app\models\Book;
 use app\models\Author;
 use app\forms\BookForm;
@@ -28,6 +29,12 @@ class BookController extends Controller
                         'actions' => ['create', 'update', 'delete'],
                         'roles' => ['manageBooks'],
                     ],
+                ],
+            ],
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['post'],
                 ],
             ],
         ];
