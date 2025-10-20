@@ -8,6 +8,7 @@ use yii\queue\JobInterface;
 use app\models\Book;
 use app\services\SmsService;
 use app\services\SubscriptionService;
+use app\dto\NewBookNotification;
 
 class NotifySubscribersJob extends BaseObject implements JobInterface
 {
@@ -29,12 +30,13 @@ class NotifySubscribersJob extends BaseObject implements JobInterface
 
         foreach ($subscriptions as $subscription) {
             try {
-                $success = $smsService->sendNewBookNotification(
-                    $subscription->phone,
-                    $subscription->author->full_name,
-                    $book->title,
-                    $book->year
+                $dto = new NewBookNotification(
+                    (string)$subscription->phone,
+                    (string)$subscription->author->full_name,
+                    (string)$book->title,
+                    (int)$book->year
                 );
+                $success = $smsService->sendFromDto($dto);
 
                 if ($success) {
                     Yii::info("SMS sent to {$subscription->phone} for book {$book->title}", 'sms');
