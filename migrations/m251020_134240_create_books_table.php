@@ -27,16 +27,6 @@ class m251020_134240_create_books_table extends Migration
         $this->createIndex('idx-books-year', '{{%books}}', 'year');
         $this->createIndex('idx-books-isbn', '{{%books}}', 'isbn');
         $this->createIndex('idx-books-created_by', '{{%books}}', 'created_by');
-        
-        $this->addForeignKey(
-            'fk-books-created_by',
-            '{{%books}}',
-            'created_by',
-            '{{%users}}',
-            'id',
-            'SET NULL',
-            'CASCADE'
-        );
     }
 
     /**

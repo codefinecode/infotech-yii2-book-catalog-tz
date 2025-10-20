@@ -17,26 +17,6 @@ class m251020_134255_create_book_authors_table extends Migration
             'author_id' => $this->integer()->notNull(),
             'PRIMARY KEY(book_id, author_id)'
         ]);
-
-        $this->addForeignKey(
-            'fk-book_authors-book',
-            '{{%book_authors}}',
-            'book_id',
-            '{{%books}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
-        
-        $this->addForeignKey(
-            'fk-book_authors-author',
-            '{{%book_authors}}',
-            'author_id',
-            '{{%authors}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
     }
 
     /**
