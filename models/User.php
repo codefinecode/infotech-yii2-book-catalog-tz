@@ -10,6 +10,9 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
     public $authKey;
     public $accessToken;
 
+    const ROLE_GUEST = 'guest';
+    const ROLE_USER = 'user';
+
     private static $users = [
         '100' => [
             'id' => '100',
@@ -27,7 +30,21 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
         ],
     ];
 
+    public static function tableName()
+    {
+        return '{{%users}}';
+    }
 
+    public function rules()
+    {
+        return [
+            [['username', 'email', 'auth_key'], 'required'],
+            [['username', 'email'], 'unique'],
+            ['email', 'email'],
+            ['status', 'default', 'value' => self::STATUS_ACTIVE],
+        ];
+    }
+    
     /**
      * {@inheritdoc}
      */
@@ -100,5 +117,10 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
     public function validatePassword($password)
     {
         return $this->password === $password;
+    }
+
+    public function canManageBooks()
+    {
+        return Yii::$app->user->can('manageBooks');
     }
 }
