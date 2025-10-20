@@ -26,6 +26,8 @@ NavBar::begin([
     'brandUrl' => Yii::$app->homeUrl,
     'options' => ['class' => 'navbar-expand-lg navbar-light bg-light'],
 ]);
+
+// Основное меню
 echo Nav::widget([
     'options' => ['class' => 'navbar-nav me-auto'],
     'items' => [
@@ -34,23 +36,25 @@ echo Nav::widget([
         ['label' => 'Отчеты', 'url' => ['/report/top-authors']],
     ],
 ]);
+
+// Меню пользователя
+$userItems = [];
+if (Yii::$app->user->isGuest) {
+    $userItems[] = ['label' => 'Демо-вход', 'url' => ['/site/demo-login'], 'linkOptions' => ['class' => 'btn btn-outline-success ms-2']];
+    $userItems[] = ['label' => 'Войти', 'url' => ['/site/login'], 'linkOptions' => ['class' => 'btn btn-outline-primary ms-2']];
+} else {
+    $userItems[] = [
+        'label' => 'Выйти (' . Yii::$app->user->identity->username . ')',
+        'url' => ['/site/logout'],
+        'linkOptions' => ['data-method' => 'post', 'class' => 'btn btn-outline-danger ms-2']
+    ];
+}
+
 echo Nav::widget([
     'options' => ['class' => 'navbar-nav'],
-    'items' => [
-        Yii::$app->user->isGuest ? (
-            ['label' => 'Войти', 'url' => ['/site/login']]
-        ) : (
-            '<li class="nav-item">'
-            . Html::beginForm(['/site/logout'])
-            . Html::submitButton(
-                'Выйти (' . Yii::$app->user->identity->username . ')',
-                ['class' => 'nav-link btn btn-link logout']
-            )
-            . Html::endForm()
-            . '</li>'
-        )
-    ],
+    'items' => $userItems,
 ]);
+
 NavBar::end();
 ?>
 

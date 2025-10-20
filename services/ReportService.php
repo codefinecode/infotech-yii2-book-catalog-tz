@@ -13,7 +13,7 @@ class ReportService
         $cacheKey = "top_authors_{$year}_{$limit}";
         
         return Yii::$app->cache->getOrSet($cacheKey, function() use ($year, $limit) {
-            return Author::find()
+            return \app\models\Author::find()
                 ->select([
                     'authors.*',
                     'books_count' => 'COUNT(book_authors.book_id)'
@@ -24,6 +24,6 @@ class ReportService
                 ->orderBy(['books_count' => SORT_DESC])
                 ->limit($limit)
                 ->all();
-        }, 3600); // Кэш на 1 час
+        }, 3600);
     }
 }

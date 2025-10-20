@@ -125,4 +125,14 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+
+    public function actionDemoLogin()
+    {
+        $user = \app\models\User::findOne(['username' => 'demo']);
+        if ($user) {
+            Yii::$app->user->login($user, 3600*24*30);
+            return $this->goHome();
+        }
+        throw new \yii\web\NotFoundHttpException('Demo user not found');
+    }
 }

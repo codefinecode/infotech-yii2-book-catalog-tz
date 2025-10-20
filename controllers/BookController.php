@@ -26,7 +26,7 @@ class BookController extends Controller
                     [
                         'allow' => true,
                         'actions' => ['create', 'update', 'delete'],
-                        'roles' => ['@'],
+                        'roles' => ['manageBooks'],
                     ],
                 ],
             ],
@@ -35,12 +35,20 @@ class BookController extends Controller
 
     public function actionIndex()
     {
-        $searchModel = new Book();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => Book::find()->with(['authors']),
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'title' => SORT_ASC,
+                ]
+            ],
+        ]);
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
         ]);
     }
 

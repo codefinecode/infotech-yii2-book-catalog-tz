@@ -1,3 +1,7 @@
 <?php
 
-return [];
+return [
+    1 => [
+        'user',
+    ],
+];

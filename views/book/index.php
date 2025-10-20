@@ -20,7 +20,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => null, 
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'title',
@@ -35,6 +34,23 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'view' => function($url, $model) {
+                        return Html::a('Просмотр', $url, ['class' => 'btn btn-sm btn-outline-primary']);
+                    },
+                    'update' => function($url, $model) {
+                        return Html::a('Редактировать', $url, ['class' => 'btn btn-sm btn-outline-secondary']);
+                    },
+                    'delete' => function($url, $model) {
+                        return Html::a('Удалить', $url, [
+                            'class' => 'btn btn-sm btn-outline-danger',
+                            'data' => [
+                                'confirm' => 'Вы уверены, что хотите удалить эту книгу?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    },
+                ],
                 'visibleButtons' => [
                     'update' => function($model, $key, $index) {
                         return Yii::$app->user->can('manageBooks');

@@ -32,7 +32,7 @@ class Book extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'year', 'isbn', 'authorIds'], 'required'],
+            [['title', 'year', 'isbn', 'authorIds'], 'safe', 'on' => 'search'],
             [['year'], 'integer', 'min' => 1000, 'max' => (int)date('Y') + 1],
             [['description'], 'string'],
             [['title'], 'string', 'max' => 255],
@@ -159,5 +159,35 @@ class Book extends \yii\db\ActiveRecord
     public static function findWithAuthors()
     {
         return self::find()->with(['authors']);
+    }
+
+    public function search($params)
+    {
+        $query = Book::find()->with(['authors']);
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'title' => SORT_ASC,
+                ]
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        // Добавляем условия фильтрации
+        $query->andFilterWhere(['like', 'title', $this->title])
+            ->andFilterWhere(['year' => $this->year])
+            ->andFilterWhere(['like', 'isbn', $this->isbn]);
+
+        return $dataProvider;
     }
 }

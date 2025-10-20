@@ -15,6 +15,8 @@ use Yii;
  */
 class Author extends \yii\db\ActiveRecord
 {
+    public $books_count;
+
     public static function tableName()
     {
         return '{{%authors}}';
@@ -27,6 +29,13 @@ class Author extends \yii\db\ActiveRecord
             [['full_name'], 'string', 'max' => 255],
             [['full_name'], 'unique'],
         ];
+    }
+    
+    public function fields()
+    {
+        $fields = parent::fields();
+        $fields['books_count'] = 'books_count';
+        return $fields;
     }
 
     public function behaviors()

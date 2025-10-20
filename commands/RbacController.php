@@ -27,4 +27,12 @@ class RbacController extends Controller
 
         echo "RBAC initialized successfully.\n";
     }
+
+    public function actionAssignUserRole($userId = 1)
+    {
+        $auth = Yii::$app->authManager;
+        $userRole = $auth->getRole('user');
+        $auth->assign($userRole, $userId);
+        echo "Role 'user' assigned to user ID: $userId\n";
+    }
 }
