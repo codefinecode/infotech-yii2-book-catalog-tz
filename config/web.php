@@ -78,6 +78,7 @@ $config = [
     // Контейнер зависимостей
     'container' => [
         'definitions' => [
+            'app\repositories\BookRepositoryInterface' => 'app\\repositories\\BookRepository',
             'app\services\BookService' => [],
             'app\services\SmsService' => [
                 'apiKey' => 'emulator_key',

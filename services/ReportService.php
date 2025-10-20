@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace app\services;
 
@@ -7,21 +8,14 @@ use app\models\Author;
 
 class ReportService
 {
-    public function getTopAuthorsByYear($year = null, $limit = 10)
+    public function getTopAuthorsByYear(?int $year = null, int $limit = 10): array
     {
-        $year = $year ?: date('Y');
+        $year = $year ?: (int)date('Y');
         $cacheKey = "top_authors_{$year}_{$limit}";
         
         return Yii::$app->cache->getOrSet($cacheKey, function() use ($year, $limit) {
-            return \app\models\Author::find()
-                ->select([
-                    'authors.*',
-                    'books_count' => 'COUNT(book_authors.book_id)'
-                ])
-                ->innerJoinWith('books')
-                ->andWhere(['books.year' => $year])
-                ->groupBy('authors.id')
-                ->orderBy(['books_count' => SORT_DESC])
+            return Author::find()
+                ->topByYear($year)
                 ->limit($limit)
                 ->all();
         }, 3600);

@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\web\UploadedFile;
 use app\models\Book;
 use app\services\BookService;
+use app\dto\BookData;
 
 class BookForm extends Model
 {
@@ -88,14 +89,15 @@ class BookForm extends Model
 
         try {
             $bookService = Yii::$container->get(BookService::class);
-            $this->_book = $bookService->createBook(
-                $this->title,
-                $this->year,
-                $this->isbn,
-                $this->authorIds,
-                $this->description,
-                $this->coverImageFile
+            $dto = new BookData(
+                (string)$this->title,
+                (int)$this->year,
+                (string)$this->isbn,
+                (array)$this->authorIds,
+                $this->description !== '' ? (string)$this->description : null,
+                $this->coverImageFile instanceof UploadedFile ? $this->coverImageFile : null
             );
+            $this->_book = $bookService->createBookFromDto($dto);
             return true;
         } catch (\DomainException $e) {
             $this->addError('*', $e->getMessage());
@@ -113,15 +115,15 @@ class BookForm extends Model
 
         try {
             $bookService = Yii::$container->get(BookService::class);
-            $bookService->updateBook(
-                $this->_book,
-                $this->title,
-                $this->year,
-                $this->isbn,
-                $this->authorIds,
-                $this->description,
-                $this->coverImageFile
+            $dto = new BookData(
+                (string)$this->title,
+                (int)$this->year,
+                (string)$this->isbn,
+                (array)$this->authorIds,
+                $this->description !== '' ? (string)$this->description : null,
+                $this->coverImageFile instanceof UploadedFile ? $this->coverImageFile : null
             );
+            $bookService->updateBookFromDto($this->_book, $dto);
             return true;
         } catch (\DomainException $e) {
             $this->addError('*', $e->getMessage());

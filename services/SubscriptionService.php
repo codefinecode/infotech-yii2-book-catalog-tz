@@ -4,12 +4,13 @@ namespace app\services;
 
 use Yii;
 use app\models\AuthorSubscription;
+use app\dto\SubscriptionRequest;
 
 class SubscriptionService
 {
-    public function subscribe($phone, $authorId)
+    public function subscribeFromDto(SubscriptionRequest $request)
     {
-        $phone = preg_replace('/[^0-9]/', '', $phone);
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
         
         if (strlen($phone) < 10) {
             throw new \DomainException('Неверный формат номера телефона');
@@ -17,7 +18,7 @@ class SubscriptionService
 
         // Проверяем существующую подписку
         $exists = AuthorSubscription::find()
-            ->where(['phone' => $phone, 'author_id' => $authorId])
+            ->where(['phone' => $phone, 'author_id' => $request->authorId])
             ->exists();
 
         if ($exists) {
@@ -26,7 +27,7 @@ class SubscriptionService
 
         $subscription = new AuthorSubscription([
             'phone' => $phone,
-            'author_id' => $authorId,
+            'author_id' => $request->authorId,
         ]);
 
         if (!$subscription->save()) {
@@ -34,6 +35,11 @@ class SubscriptionService
         }
 
         return $subscription;
+    }
+
+    public function subscribe($phone, $authorId)
+    {
+        return $this->subscribeFromDto(new SubscriptionRequest((string)$phone, (int)$authorId));
     }
 
     public function getSubscriptionsByAuthor($authorId)

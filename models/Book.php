@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\web\UploadedFile;
+use app\queries\BookQuery;
 
 /**
  * @property int $id
@@ -27,6 +28,14 @@ class Book extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return '{{%books}}';
+    }
+
+    /**
+     * @return BookQuery
+     */
+    public static function find()
+    {
+        return new BookQuery(static::class);
     }
 
     public function rules()
@@ -158,7 +167,7 @@ class Book extends \yii\db\ActiveRecord
 
     public static function findWithAuthors()
     {
-        return self::find()->with(['authors']);
+        return self::find()->withAuthors();
     }
 
     public function search($params)

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\queries\AuthorQuery;
 
 /**
  * @property int $id
@@ -16,6 +17,14 @@ use Yii;
 class Author extends \yii\db\ActiveRecord
 {
     public $books_count;
+
+    /**
+     * @return AuthorQuery
+     */
+    public static function find()
+    {
+        return new AuthorQuery(static::class);
+    }
 
     public static function tableName()
     {

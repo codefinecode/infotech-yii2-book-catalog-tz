@@ -5,6 +5,7 @@ namespace app\forms;
 use Yii;
 use yii\base\Model;
 use app\services\SubscriptionService;
+use app\dto\SubscriptionRequest;
 
 class SubscriptionForm extends Model
 {
@@ -36,7 +37,8 @@ class SubscriptionForm extends Model
 
         try {
             $subscriptionService = Yii::$container->get(SubscriptionService::class);
-            $subscriptionService->subscribe($this->phone, $this->authorId);
+            $dto = new SubscriptionRequest((string)$this->phone, (int)$this->authorId);
+            $subscriptionService->subscribeFromDto($dto);
             return true;
         } catch (\DomainException $e) {
             $this->addError('*', $e->getMessage());
