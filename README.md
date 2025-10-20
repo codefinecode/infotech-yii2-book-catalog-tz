@@ -1,3 +1,152 @@
+# INFOTECH — Тестовое задание: Каталог книг (Yii2 + MySQL)
+
+Проект реализует каталог книг по условиям тестового задания из вакансии PHP/Yii2 Developer:
+
+- **Книги**: название, год выпуска, описание, ISBN, фото обложки.
+- **Авторы**: ФИО, у книги может быть несколько авторов.
+- **Доступы**:
+  - **Гость**: просмотр, подписка на новые книги автора (по телефону), публичный отчёт.
+  - **Юзер**: плюс CRUD по книгам/авторам (через разрешение `manageBooks` в RBAC).
+- **Отчёт**: ТОП‑10 авторов, выпустившие больше книг за выбранный год (доступен всем).
+- **SMS**: уведомление о новых книгах авторам подписок через SMSPilot (эмулятор).
+
+
+## Технологический стек
+
+- PHP 8+
+- Yii2 (~2.0.45)
+- MySQL 8
+- Queue: `yii2-queue` (file driver)
+- Redis (подключен как зависимость; для задания не обязателен)
+- GuzzleHTTP (интеграция с SMSPilot)
+- Bootstrap 5 вьюхи (без сложной верстки)
+
+
+## Быстрый старт (локально)
+
+1. Установите зависимости
+   
+   ```bash
+   composer install
+   ```
+
+2. Настройте БД в `config/db.php`
+   
+   ```php
+   return [
+       'class' => 'yii\\db\\Connection',
+       'dsn' => 'mysql:host=127.0.0.1;dbname=infotech_books',
+       'username' => 'root',
+       'password' => '',
+       'charset' => 'utf8mb4',
+   ];
+   ```
+
+3. Примените миграции
+   
+   ```bash
+   php yii migrate
+   ```
+
+4. Инициализируйте RBAC и назначьте роль
+   
+   ```bash
+   # создаёт разрешение manageBooks и роль user
+   php yii rbac/init
+   
+   # опционально: назначить роль user демо‑пользователю с id=1
+   php yii rbac/assign-user-role 1
+   ```
+
+5. Создайте демо‑данные (авторы, книги, демо‑пользователь `demo`)
+   
+   ```bash
+   php yii migrate/up m251020_154731_create_demo_data
+   ```
+
+6. Запуск веб‑сервера
+   
+   ```bash
+   php yii serve --docroot=web --port=8080
+   # http://localhost:8080
+   ```
+
+
+## Уведомления по подпискам (SMSPilot)
+
+- Конфиг в `config/web.php` через DI‑контейнер:
+  
+  ```php
+  'container' => [
+      'definitions' => [
+          'app\\services\\SmsService' => [
+              'apiKey' => 'emulator_key', // для тестов — реальная отправка не производится
+          ],
+      ],
+  ],
+  ```
+
+- Новая книга триггерит `jobs/NotifySubscribersJob.php`, который по авторам книги собирает подписчиков и шлёт SMS через `services/SmsService.php`.
+- Для file‑очереди запуск воркера не обязателен в рамках проверки кода; задача ставится в очередь. Для полноценной обработки:
+  
+  ```bash
+  php yii queue/listen
+  ```
+
+
+## Маршруты
+
+- `GET /books` — список книг (`BookController::actionIndex()`)
+- `GET /books/{id}` — просмотр книги
+- `GET/POST /books/create` — создание книги (требуется `manageBooks`)
+- `GET/POST /books/{id}/edit` — редактирование (требуется `manageBooks`)
+- `POST /books/{id}/delete` — удаление (требуется `manageBooks`)
+- `GET /authors` — список авторов
+- `GET /authors/{id}` — страница автора + форма подписки (гостям)
+- `POST /authors/{id}/subscribe` — подписка на автора
+- `GET /reports/top-authors[?year=YYYY]` — отчёт ТОП‑10 авторов за год
+
+
+## Демо‑вход и роли
+
+- В меню есть кнопка «Демо‑вход», также доступен роут `GET /site/demo-login`.
+- Роль `user` получает разрешение `manageBooks`. Автор книги — это не пользователь.
+
+
+## Архитектура и файлы
+
+- Модели: `models/Book.php`, `models/Author.php`, `models/AuthorSubscription.php`, `models/BookAuthor.php`
+- Сервисы: `services/BookService.php`, `services/SubscriptionService.php`, `services/SmsService.php`, `services/ReportService.php`
+- Форма создания/редактирования книги: `forms/BookForm.php`
+- Очередь и задания: `jobs/NotifySubscribersJob.php`
+- Контроллеры: `controllers/BookController.php`, `controllers/AuthorController.php`, `controllers/ReportController.php`
+- Вьюхи: `views/book/*`, `views/author/*`, `views/report/top-authors.php`, `views/layouts/main.php`
+- RBAC (PhpManager): файлы `rbac/*`, консольный `commands/RbacController.php`
+- Миграции: `migrations/*` (создание схемы, внешние ключи, демо‑данные)
+
+
+## Соответствие требованиям теста
+
+- CRUD по книгам/авторам, валидации, связь многие‑ко‑многим.
+- Подписка гостя на автора по телефону, имитация SMS через SMSPilot `emulator_key`.
+- Отчёт ТОП‑10 авторов за год с кэшированием.
+- RBAC: гости видят каталог и отчёт, пользователи с `manageBooks` выполняют CRUD.
+- Верстка простая, на Bootstrap 5.
+
+
+## Что можно докрутить (по времени/желанию)
+
+- Валидация и нормализация телефонных номеров (E.164), маски на форме.
+- Хранение обложек на S3/MinIO; генерация превью; валидация MIME.
+- Фильтры/поиск по книгам и авторам, пагинация и сортировка расширенные.
+- Мидлварь для ограничения частоты подписок с одного номера.
+- Перевод RBAC на `DbManager`, миграции ролей.
+- Покрытие модульными тестами `services/*` и `forms/*`.
+
+---
+
+Ниже — оригинальный README шаблона Yii2 для справки по инфраструктуре.
+
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
         <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
