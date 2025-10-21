@@ -94,8 +94,6 @@
   php yii queue/listen
   ```
 
-Примечание: в `config/console.php` рекомендуется использовать стандартный контроллер `\yii\queue\command\QueueController`. Если в `controllerMap['queue']` указан кастомный `\app\commands\QueueController`, убедитесь, что класс существует.
-
 
 ## Маршруты
 
