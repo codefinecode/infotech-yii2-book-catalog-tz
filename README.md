@@ -20,6 +20,7 @@
 - Redis (подключен как зависимость; для задания не обязателен)
 - GuzzleHTTP (интеграция с SMSPilot)
 - Bootstrap 5 вьюхи (без сложной верстки)
+ - Собственные Query Objects (`ActiveQuery`), DTO, Repository Layer, DI, бизнес‑исключения
 
 
 ## Быстрый старт (локально)
@@ -93,6 +94,8 @@
   php yii queue/listen
   ```
 
+Примечание: в `config/console.php` рекомендуется использовать стандартный контроллер `\yii\queue\command\QueueController`. Если в `controllerMap['queue']` указан кастомный `\app\commands\QueueController`, убедитесь, что класс существует.
+
 
 ## Маршруты
 
@@ -117,12 +120,16 @@
 
 - Модели: `models/Book.php`, `models/Author.php`, `models/AuthorSubscription.php`, `models/BookAuthor.php`
 - Сервисы: `services/BookService.php`, `services/SubscriptionService.php`, `services/SmsService.php`, `services/ReportService.php`
-- Форма создания/редактирования книги: `forms/BookForm.php`
+- Формы: `forms/BookForm.php`, `forms/SubscriptionForm.php`
 - Очередь и задания: `jobs/NotifySubscribersJob.php`
 - Контроллеры: `controllers/BookController.php`, `controllers/AuthorController.php`, `controllers/ReportController.php`
 - Вьюхи: `views/book/*`, `views/author/*`, `views/report/top-authors.php`, `views/layouts/main.php`
 - RBAC (PhpManager): файлы `rbac/*`, консольный `commands/RbacController.php`
 - Миграции: `migrations/*` (создание схемы, внешние ключи, демо‑данные)
+- DTO: `dto/BookData.php`, `dto/SubscriptionRequest.php`, `dto/NewBookNotification.php`
+- Query Objects: `queries/BookQuery.php`, `queries/AuthorQuery.php`
+- Репозитории: `repositories/BookRepositoryInterface.php`, `repositories/BookRepository.php`
+- DI: биндинг в `config/web.php` → `BookRepositoryInterface` => `BookRepository`
 
 
 ## Соответствие требованиям теста
@@ -132,6 +139,7 @@
 - Отчёт ТОП‑10 авторов за год с кэшированием.
 - RBAC: гости видят каталог и отчёт, пользователи с `manageBooks` выполняют CRUD.
 - Верстка простая, на Bootstrap 5.
+ - Сеньор‑практики: DTO, Query Objects, Repository, DI, бизнес‑исключения, строгие типы в новых классах.
 
 
 ## Что можно докрутить (по времени/желанию)
@@ -142,6 +150,7 @@
 - Мидлварь для ограничения частоты подписок с одного номера.
 - Перевод RBAC на `DbManager`, миграции ролей.
 - Покрытие модульными тестами `services/*` и `forms/*`.
+ - Repository для авторов (симметрия), возврат DTO из отчётов, автогенерация превью обложек, маски ввода телефонов.
 
 ---
 
